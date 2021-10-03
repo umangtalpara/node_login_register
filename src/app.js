@@ -1,11 +1,12 @@
+require('dotenv').config();
 const express = require("express");
-
 require("./db/conn");
 const path = require("path");
 const hbs = require("hbs");
 const Register = require("./models/register");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const async = require("hbs/lib/async");
-// const mensRouter = require("./routers/men");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -18,8 +19,6 @@ hbs.registerPartials(partials_path);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-// app.use(mensRouter);
-// app.use(express.static(static_path));
 
 app.get("/", (req, res) => {
   res.render("index");
@@ -31,6 +30,7 @@ app.get("/register", (req, res) => {
   res.render("register");
 });
 
+//new register
 app.post("/register", async (req, res) => {
   try {
     const password = req.body.password;
@@ -44,6 +44,12 @@ app.post("/register", async (req, res) => {
         password: password,
         confirmpassword: confirmpassword,
       });
+
+      console.log("the success part" + registerEmp);
+
+      const token = await registerEmp.generateAuthToken();
+      console.log("the success token" + token);
+
       const registered = await registerEmp.save();
       res.status(200).render("index");
     } else {
@@ -51,23 +57,28 @@ app.post("/register", async (req, res) => {
     }
   } catch (e) {
     res.status(400).send(e);
+    console.log("the success token" + e);
   }
 });
 
-app.post("/login", async(req, res) => {
+app.post("/login", async (req, res) => {
   try {
     const email = req.body.email;
     const password = req.body.password;
 
     const useremail = await Register.findOne({ email: email });
+    const isMatch = await bcrypt.compare(password, useremail.password);
 
-    if (useremail.password === password) {
+    const token = await useremail.generateAuthToken();
+    console.log("the success token" + token);
+
+    if (isMatch) {
       res.status(200).render("index");
     } else {
       res.send("password not match");
     }
   } catch (e) {
-    res.status(400).send(e);
+    res.status(400).send("details not valied"); 
   }
 });
 
