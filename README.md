@@ -1,7 +1,7 @@
 # node_login_register
 create by umang talpara
 
-##frist step
+##first step
 please set your .env file
 
 ##second Step
