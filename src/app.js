@@ -7,6 +7,7 @@ const Register = require("./models/register");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const async = require("hbs/lib/async");
+const cookieParser = require("cookie-parser");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -18,10 +19,14 @@ app.set("views", views_path);
 hbs.registerPartials(partials_path);
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 
 app.get("/", (req, res) => {
   res.render("index");
+});
+app.get("/secret", (req, res) => {
+  res.render("secret");
 });
 app.get("/login", (req, res) => {
   res.render("login");
@@ -49,6 +54,11 @@ app.post("/register", async (req, res) => {
 
       const token = await registerEmp.generateAuthToken();
       console.log("the success token" + token);
+
+      res.cookie("jwt", token,{
+        expires:new Date(Date.now() + 30000),
+        httpOnly:true
+      });
 
       const registered = await registerEmp.save();
       res.status(200).render("index");
