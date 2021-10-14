@@ -7,6 +7,7 @@ const Register = require("./models/register");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const async = require("hbs/lib/async");
+const auth = require("./middleware/auth");
 const cookieParser = require("cookie-parser");
 
 const app = express();
@@ -25,7 +26,8 @@ app.use(express.urlencoded({ extended: false }));
 app.get("/", (req, res) => {
   res.render("index");
 });
-app.get("/secret", (req, res) => {
+app.get("/secret",auth, (req, res) => {
+  console.log(aaa`${req.cookies.jwt}`);
   res.render("secret");
 });
 app.get("/login", (req, res) => {
